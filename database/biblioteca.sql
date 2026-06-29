@@ -13,7 +13,7 @@ PRAGMA foreign_keys = ON;
 -- Tipos de socio: define límites y condiciones de préstamo por categoría
 CREATE TABLE TipoSocio (
     Id                   INTEGER PRIMARY KEY AUTOINCREMENT,
-    Nombre               TEXT    NOT NULL,
+    Clase                TEXT    NOT NULL,
     MaxLibrosSimultaneos INTEGER NOT NULL,
     DiasPrestamo         INTEGER NOT NULL,
     MultaPorDia          NUMERIC(10,2) NOT NULL
@@ -22,7 +22,7 @@ CREATE TABLE TipoSocio (
 -- Estados posibles de un préstamo
 CREATE TABLE EstadoPrestamo (
     Id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    Descripcion TEXT NOT NULL
+    Estado TEXT NOT NULL
 );
 
 -- Estados posibles de una reserva
