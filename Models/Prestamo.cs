@@ -12,6 +12,7 @@ namespace Biblioteca.Models
         public DateTime? FechaDevolucion { get; set; }
         public int EstadoPrestamoId { get; set; }
         public decimal? MultaGenerada { get; set; }
+        public bool MultaPagada { get; set; }
 
         public Socio Socio { get; set; } = null!;
         public Libro Libro { get; set; } = null!;

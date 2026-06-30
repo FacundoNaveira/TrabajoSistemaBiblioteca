@@ -63,7 +63,8 @@ CREATE TABLE IF NOT EXISTS Prestamo (
     FechaVencimiento TEXT    NOT NULL,
     FechaDevolucion  TEXT,
     EstadoPrestamoId INTEGER NOT NULL REFERENCES EstadoPrestamo(Id),
-    MultaGenerada    NUMERIC(10,2)
+    MultaGenerada    NUMERIC(10,2),
+    MultaPagada      INTEGER DEFAULT 0 NOT NULL
 );
 
 -- Reservas de libros por socios
@@ -114,11 +115,11 @@ INSERT OR IGNORE INTO Socio (NroSocio, Nombre, Apellido, Email, TipoSocioId, Act
 (5, 'Pedro',  'Rodríguez',  'prodriguez@email.com',   2, 1);
 
 -- Préstamos: 2 activos (Dune → 0 copias disponibles), 1 devuelto en término, 1 vencido
-INSERT OR IGNORE INTO Prestamo (Id, NroSocio, ISBN, FechaPrestamo, FechaVencimiento, FechaDevolucion, EstadoPrestamoId, MultaGenerada) VALUES
-(1, 1, '978-0441172719', '2026-06-25', '2026-07-02', NULL,        1, NULL),
-(2, 2, '978-0441172719', '2026-06-26', '2026-07-10', NULL,        1, NULL),
-(3, 3, '978-0307474728', '2026-06-10', '2026-07-10', '2026-06-25', 2, 0.00),
-(4, 5, '978-0451524935', '2026-06-01', '2026-06-15', NULL,        3, NULL);
+INSERT OR IGNORE INTO Prestamo (Id, NroSocio, ISBN, FechaPrestamo, FechaVencimiento, FechaDevolucion, EstadoPrestamoId, MultaGenerada, MultaPagada) VALUES
+(1, 1, '978-0441172719', '2026-06-25', '2026-07-02', NULL,        1, NULL, 0),
+(2, 2, '978-0441172719', '2026-06-26', '2026-07-10', NULL,        1, NULL, 0),
+(3, 3, '978-0307474728', '2026-06-10', '2026-07-10', '2026-06-25', 2, 0.00, 0),
+(4, 5, '978-0451524935', '2026-06-01', '2026-06-15', NULL,        3, NULL, 0);
 
 -- Reservas pendientes sobre Dune (0 copias disponibles)
 INSERT OR IGNORE INTO Reserva (Id, NroSocio, ISBN, FechaReserva, EstadoReservaId) VALUES
