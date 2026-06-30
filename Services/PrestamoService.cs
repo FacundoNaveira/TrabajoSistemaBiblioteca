@@ -132,7 +132,8 @@ namespace Biblioteca.Services
 
         private async Task ProcesarReservas(string isbn)
         {
-            // Hook para RN-07 — implementado en feature/reservas por Leandro
-            await Task.CompletedTask;
+            var reservaService = new ReservaService(_context);
+            await reservaService.ProcesarReservasPendientes(isbn);
         }
+    }
 }

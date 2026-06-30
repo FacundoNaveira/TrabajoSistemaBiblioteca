@@ -1,1 +1,9 @@
 AGENT.md
+
+# Ignorar carpetas de compilación
+[Oo]bj/
+[Bb]in/
+
+# Ignorar bases de datos locales
+*.db
+*.sqlite
