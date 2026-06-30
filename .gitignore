@@ -1,1 +1,5 @@
 AGENT.md
+
+# Ignorar carpetas de compilación
+[Oo]bj/
+[Bb]in/

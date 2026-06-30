@@ -24,6 +24,7 @@ namespace Biblioteca.Data
 
             modelBuilder.Entity<Libro>(entity =>
             {
+                entity.ToTable("Libro");
                 entity.HasKey(l => l.ISBN);
                 entity.Property(l => l.ISBN).ValueGeneratedNever();
                 entity.Property(l => l.Titulo).IsRequired();
@@ -34,6 +35,7 @@ namespace Biblioteca.Data
 
             modelBuilder.Entity<Socio>(entity =>
             {
+                entity.ToTable("Socio");
                 entity.HasKey(s => s.NroSocio);
                 entity.Property(s => s.NroSocio).ValueGeneratedNever();
                 entity.Property(s => s.Nombre).IsRequired();
@@ -49,6 +51,7 @@ namespace Biblioteca.Data
 
             modelBuilder.Entity<TipoSocio>(entity =>
             {
+                entity.ToTable("TipoSocio");
                 entity.HasKey(t => t.Id);
                 entity.Property(t => t.Clase).IsRequired();
                 entity.Property(t => t.MaxLibrosSimultaneos).IsRequired();
@@ -58,18 +61,21 @@ namespace Biblioteca.Data
 
             modelBuilder.Entity<EstadoPrestamo>(entity =>
             {
+                entity.ToTable("EstadoPrestamo");
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Estado).IsRequired();
             });
 
             modelBuilder.Entity<EstadoReserva>(entity =>
             {
+                entity.ToTable("EstadoReserva");
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Descripcion).IsRequired();
             });
 
             modelBuilder.Entity<Prestamo>(entity =>
             {
+                entity.ToTable("Prestamo");
                 entity.HasKey(p => p.Id);
                 entity.Property(p => p.NroSocio).IsRequired();
                 entity.Property(p => p.ISBN).IsRequired();
@@ -94,6 +100,7 @@ namespace Biblioteca.Data
 
             modelBuilder.Entity<Reserva>(entity =>
             {
+                entity.ToTable("Reserva");
                 entity.HasKey(r => r.Id);
                 entity.Property(r => r.NroSocio).IsRequired();
                 entity.Property(r => r.ISBN).IsRequired();
