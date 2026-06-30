@@ -84,6 +84,7 @@ namespace Biblioteca.Data
                 entity.Property(p => p.FechaDevolucion).HasColumnType("TEXT");
                 entity.Property(p => p.EstadoPrestamoId).IsRequired();
                 entity.Property(p => p.MultaGenerada).HasPrecision(10, 2);
+                entity.Property(p => p.MultaPagada).IsRequired().HasColumnType("INTEGER");
 
                 entity.HasOne(p => p.Socio)
                       .WithMany(s => s.Prestamos)
