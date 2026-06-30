@@ -7,3 +7,6 @@ AGENT.md
 # Ignorar bases de datos locales
 *.db
 *.sqlite
+
+# Ignorar planificacion
+planificacion.txt
