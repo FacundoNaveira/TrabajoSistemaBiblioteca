@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using Biblioteca.Data;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,9 @@ namespace Biblioteca
 
             using var context = new BibliotecaDbContext(options);
             context.Database.EnsureCreated();
+
+            var seedSql = File.ReadAllText("database/biblioteca.sql");
+            context.Database.ExecuteSqlRaw(seedSql);
 
             var disponibles = context.Libros
                 .Select(l => new
