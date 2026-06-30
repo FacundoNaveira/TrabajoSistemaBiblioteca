@@ -20,21 +20,13 @@ namespace Biblioteca
             var seedSql = File.ReadAllText("database/biblioteca.sql");
             context.Database.ExecuteSqlRaw(seedSql);
 
-            var disponibles = context.Libros
-                .Select(l => new
-                {
-                    l.Titulo,
-                    l.Autor,
-                    Disponibles = l.CantidadCopias - l.Prestamos.Count(p => p.FechaDevolucion == null)
-                })
-                .Where(l => l.Disponibles > 0)
-                .ToList();
-
-            Console.WriteLine("Libros con copias disponibles:");
-            foreach (var libro in disponibles)
-            {
-                Console.WriteLine($"  {libro.Titulo} ({libro.Autor}) — {libro.Disponibles} disponible(s)");
-            }
+            var prestamoService = new Biblioteca.Services.PrestamoService(context);
+            var reservaService = new Biblioteca.Services.ReservaService(context);
+            
+            var consoleFlows = new Biblioteca.UI.ConsoleFlows(context, prestamoService, reservaService);
+            
+            // Iniciamos el flujo que acabamos de crear
+            consoleFlows.FlujoPrestamo();
         }
     }
 }
