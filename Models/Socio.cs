@@ -9,14 +9,14 @@ namespace Biblioteca.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int NroSocio { get; set; }
-        public string Nombre { get; set; }
-        public string Apellido { get; set; }
-        public string Email { get; set; }
+        public string Nombre { get; set; } = null!;
+        public string Apellido { get; set; } = null!;
+        public string Email { get; set; } = null!;
         public int TipoSocioId { get; set; }
         public bool Activo { get; set; }
 
-        public TipoSocio TipoSocio { get; set; }
-        public ICollection<Prestamo> Prestamos { get; set; }
-        public ICollection<Reserva> Reservas { get; set; }
+        public TipoSocio TipoSocio { get; set; } = null!;
+        public ICollection<Prestamo> Prestamos { get; set; } = new List<Prestamo>();
+        public ICollection<Reserva> Reservas { get; set; } = new List<Reserva>();
     }
 }

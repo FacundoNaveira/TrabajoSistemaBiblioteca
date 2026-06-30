@@ -6,15 +6,15 @@ namespace Biblioteca.Models
     {
         public int Id { get; set; }
         public int NroSocio { get; set; }
-        public string ISBN { get; set; }
+        public string ISBN { get; set; } = null!;
         public DateTime FechaPrestamo { get; set; }
         public DateTime FechaVencimiento { get; set; }
         public DateTime? FechaDevolucion { get; set; }
         public int EstadoPrestamoId { get; set; }
         public decimal? MultaGenerada { get; set; }
 
-        public Socio Socio { get; set; }
-        public Libro Libro { get; set; }
-        public EstadoPrestamo EstadoPrestamo { get; set; }
+        public Socio Socio { get; set; } = null!;
+        public Libro Libro { get; set; } = null!;
+        public EstadoPrestamo EstadoPrestamo { get; set; } = null!;
     }
 }
