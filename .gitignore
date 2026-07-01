@@ -10,3 +10,6 @@ AGENT.md
 
 # Ignorar planificacion
 planificacion.txt
+
+# Script de tests local
+test_biblioteca.py

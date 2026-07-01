@@ -1,7 +1,8 @@
 using System;
 using System.IO;
-using System.Linq;
 using Biblioteca.Data;
+using Biblioteca.Services;
+using Biblioteca.UI;
 using Microsoft.EntityFrameworkCore;
 
 namespace Biblioteca
@@ -20,13 +21,64 @@ namespace Biblioteca
             var seedSql = File.ReadAllText("database/biblioteca.sql");
             context.Database.ExecuteSqlRaw(seedSql);
 
-            var prestamoService = new Biblioteca.Services.PrestamoService(context);
-            var reservaService = new Biblioteca.Services.ReservaService(context);
-            
-            var consoleFlows = new Biblioteca.UI.ConsoleFlows(context, prestamoService, reservaService);
-            
-            // Iniciamos el flujo que acabamos de crear
-            consoleFlows.FlujoPrestamo();
+            var prestamoService = new PrestamoService(context);
+            var reservaService = new ReservaService(context);
+            var consoleFlows = new ConsoleFlows(context, prestamoService, reservaService);
+
+            consoleFlows.VerLibrosDisponibles();
+
+            var salir = false;
+            while (!salir)
+            {
+                Console.WriteLine(@"
+╔══════════════════════════════╗
+║    BIBLIOTECA MUNICIPAL      ║
+╠══════════════════════════════╣
+║  1. Ver libros disponibles   ║
+║  2. Registrar prestamo       ║
+║  3. Registrar devolucion     ║
+║  4. Hacer una reserva        ║
+║  5. Ver detalle de socio     ║
+║  0. Salir                    ║
+╚══════════════════════════════╝");
+
+                Console.Write("Opcion: ");
+                var input = Console.ReadLine();
+
+                try
+                {
+                    switch (input)
+                    {
+                        case "1":
+                            consoleFlows.VerLibrosDisponibles();
+                            break;
+                        case "2":
+                            consoleFlows.FlujoPrestamo();
+                            break;
+                        case "3":
+                            consoleFlows.FlujoDevolucion();
+                            break;
+                        case "4":
+                            consoleFlows.FlujoReserva();
+                            break;
+                        case "5":
+                            consoleFlows.FlujoSocio();
+                            break;
+                        case "0":
+                            salir = true;
+                            break;
+                        default:
+                            Console.WriteLine("Opcion invalida. Intente de nuevo.");
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error inesperado: {ex.Message}");
+                }
+            }
+
+            Console.WriteLine("Hasta luego.");
         }
     }
 }
