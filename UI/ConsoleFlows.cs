@@ -114,5 +114,54 @@ namespace Biblioteca.UI
                 return null;
             }
         }
+
+        public void FlujoDevolucion()
+        {
+            Console.WriteLine("\n--- REGISTRAR DEVOLUCION ---");
+
+            Console.Write("Ingresa NroSocio: ");
+            if (!int.TryParse(Console.ReadLine(), out int nroSocio))
+            {
+                Console.WriteLine("Error: NroSocio debe ser un numero valido.");
+                return;
+            }
+
+            var socio = _context.Socios.FirstOrDefault(s => s.NroSocio == nroSocio);
+            if (socio == null)
+            {
+                Console.WriteLine("Error: El socio no existe.");
+                return;
+            }
+
+            var prestamosActivos = _context.Prestamos
+                .Include(p => p.Libro)
+                .Where(p => p.NroSocio == nroSocio && p.FechaDevolucion == null)
+                .ToList();
+
+            if (!prestamosActivos.Any())
+            {
+                Console.WriteLine("El socio no tiene prestamos activos.");
+                return;
+            }
+
+            Console.WriteLine("\nPrestamos activos:");
+            foreach (var p in prestamosActivos)
+            {
+                var vencido = p.FechaVencimiento < DateTime.Today;
+                var marca = vencido ? " - VENCIDO" : "";
+                Console.WriteLine($" [{p.Id}] {p.Libro.Titulo} — vence {p.FechaVencimiento:dd/MM/yyyy}{marca}");
+            }
+
+            Console.WriteLine();
+            Console.Write("Ingresa el Id del prestamo a devolver: ");
+            if (!int.TryParse(Console.ReadLine(), out int idPrestamo))
+            {
+                Console.WriteLine("Error: Id invalido.");
+                return;
+            }
+
+            var resultado = _prestamoService.RegistrarDevolucion(idPrestamo).GetAwaiter().GetResult();
+            Console.WriteLine($"\n{resultado.Mensaje}");
+        }
     }
 }
