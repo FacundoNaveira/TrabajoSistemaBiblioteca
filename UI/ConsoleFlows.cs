@@ -185,5 +185,91 @@ namespace Biblioteca.UI
             var resultado = _reservaService.CrearReserva(nroSocio, isbn);
             Console.WriteLine($"\n{resultado.Mensaje}");
         }
+
+        public void VerLibrosDisponibles()
+        {
+            Console.WriteLine("\n--- LIBROS DISPONIBLES ---");
+
+            var disponibles = _context.Libros
+                .Select(l => new
+                {
+                    l.Titulo,
+                    l.Autor,
+                    Disponibles = l.CantidadCopias - l.Prestamos.Count(p => p.FechaDevolucion == null)
+                })
+                .Where(l => l.Disponibles > 0)
+                .ToList();
+
+            if (!disponibles.Any())
+            {
+                Console.WriteLine("No hay libros con copias disponibles.");
+                return;
+            }
+
+            foreach (var libro in disponibles)
+            {
+                Console.WriteLine($"  {libro.Titulo} ({libro.Autor}) — {libro.Disponibles} disponible(s)");
+            }
+        }
+
+        public void FlujoSocio()
+        {
+            Console.WriteLine("\n--- DETALLE DE SOCIO ---");
+
+            Console.Write("Ingresa NroSocio: ");
+            if (!int.TryParse(Console.ReadLine(), out int nroSocio))
+            {
+                Console.WriteLine("Error: NroSocio debe ser un numero valido.");
+                return;
+            }
+
+            var socio = _context.Socios
+                .Include(s => s.TipoSocio)
+                .FirstOrDefault(s => s.NroSocio == nroSocio);
+
+            if (socio == null)
+            {
+                Console.WriteLine("Error: El socio no existe.");
+                return;
+            }
+
+            Console.WriteLine($"\n  Nombre: {socio.Nombre} {socio.Apellido}");
+            Console.WriteLine($"  Email: {socio.Email}");
+            Console.WriteLine($"  Tipo: {socio.TipoSocio.Clase} (max {socio.TipoSocio.MaxLibrosSimultaneos} libros, {socio.TipoSocio.DiasPrestamo} dias)");
+            Console.WriteLine($"  Estado: {(socio.Activo ? "Activo" : "Inactivo")}");
+
+            var prestamos = _context.Prestamos
+                .Include(p => p.Libro)
+                .Where(p => p.NroSocio == nroSocio && p.FechaDevolucion == null)
+                .ToList();
+
+            Console.WriteLine($"\n  Prestamos activos: {prestamos.Count}");
+            foreach (var p in prestamos)
+            {
+                var vencido = p.FechaVencimiento < DateTime.Today;
+                var marca = vencido ? " - VENCIDO" : "";
+                Console.WriteLine($"    [{p.Id}] {p.Libro.Titulo} — vence {p.FechaVencimiento:dd/MM/yyyy}{marca}");
+            }
+
+            var totalMultas = _context.Prestamos
+                .Where(p => p.NroSocio == nroSocio && p.MultaGenerada > 0 && !p.MultaPagada)
+                .Sum(p => (decimal?)p.MultaGenerada) ?? 0;
+
+            if (totalMultas > 0)
+                Console.WriteLine($"\n  Multas pendientes: ${totalMultas:F2}");
+
+            var reservasPendientes = _context.Reservas
+                .Include(r => r.Libro)
+                .Include(r => r.EstadoReserva)
+                .Where(r => r.NroSocio == nroSocio && r.EstadoReserva.Descripcion == "Pendiente")
+                .ToList();
+
+            if (reservasPendientes.Any())
+            {
+                Console.WriteLine($"\n  Reservas pendientes: {reservasPendientes.Count}");
+                foreach (var r in reservasPendientes)
+                    Console.WriteLine($"    [{r.Id}] {r.Libro.Titulo} — {r.FechaReserva:dd/MM/yyyy}");
+            }
+        }
     }
 }
