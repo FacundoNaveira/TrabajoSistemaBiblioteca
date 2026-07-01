@@ -1,0 +1,15 @@
+AGENT.md
+
+# Ignorar carpetas de compilación
+[Oo]bj/
+[Bb]in/
+
+# Ignorar bases de datos locales
+*.db
+*.sqlite
+
+# Ignorar planificacion
+planificacion.txt
+
+# Script de tests local
+test_biblioteca.py
