@@ -46,11 +46,15 @@ namespace Biblioteca.UI
             }
 
             var resultado = _prestamoService.RegistrarPrestamo(nroSocio, isbn);
-            Console.WriteLine($"\n{resultado.Mensaje}");
-
-            if (resultado.OfrecerReserva)
+            
+            if (!resultado.OfrecerReserva)
             {
-                Console.Write("No hay copias disponibles. Queres reservarlo? (s/n): ");
+                Console.WriteLine($"\n{resultado.Mensaje}");
+            }
+            else
+            {
+                Console.WriteLine($"\nAtención: {resultado.Mensaje}");
+                Console.Write("¿Querés reservar el libro para cuando esté disponible? (s/n): ");
                 var respuesta = Console.ReadLine()?.Trim().ToLower();
                 if (respuesta == "s")
                 {
@@ -99,12 +103,12 @@ namespace Biblioteca.UI
                 
                 var disponibles = libro.CantidadCopias - copiasActivas;
 
-                Console.WriteLine($"[{index}] {libro.Titulo} — {libro.Autor} | Disponibles: {disponibles}");
+                Console.WriteLine($" Opción [{index}]: {libro.Titulo} — {libro.Autor} | Copias disponibles: {disponibles}");
                 index++;
             }
 
             Console.WriteLine();
-            Console.Write("Elegi un numero: ");
+            Console.Write(" Ingresa el número de la opción elegida: ");
             if (int.TryParse(Console.ReadLine(), out int seleccion) && opcionesLibros.ContainsKey(seleccion))
             {
                 return opcionesLibros[seleccion].ISBN;
@@ -253,7 +257,9 @@ namespace Biblioteca.UI
 
             var totalMultas = _context.Prestamos
                 .Where(p => p.NroSocio == nroSocio && p.MultaGenerada > 0 && !p.MultaPagada)
-                .Sum(p => (decimal?)p.MultaGenerada) ?? 0;
+                .Select(p => p.MultaGenerada)
+                .ToList()
+                .Sum(m => m ?? 0);
 
             if (totalMultas > 0)
                 Console.WriteLine($"\n  Multas pendientes: ${totalMultas:F2}");

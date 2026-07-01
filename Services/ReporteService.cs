@@ -45,8 +45,12 @@ namespace Biblioteca.Services
 
         public async Task SociosConMultasPendientes()
         {
-            var resultado = await _context.Prestamos
+            var prestamosConMultas = await _context.Prestamos
+                .Include(p => p.Socio)
                 .Where(p => p.MultaGenerada != null && p.MultaPagada == false)
+                .ToListAsync();
+
+            var resultado = prestamosConMultas
                 .GroupBy(p => new { p.NroSocio, p.Socio.Nombre, p.Socio.Apellido })
                 .Select(g => new {
                     g.Key.NroSocio,
@@ -55,7 +59,7 @@ namespace Biblioteca.Services
                     TotalMultas = g.Sum(p => p.MultaGenerada.Value)
                 })
                 .OrderByDescending(x => x.TotalMultas)
-                .ToListAsync();
+                .ToList();
 
             Console.WriteLine("══════════════════════════════════════════");
             Console.WriteLine(" SOCIOS CON MULTAS PENDIENTES");
@@ -94,6 +98,107 @@ namespace Biblioteca.Services
             }
             Console.WriteLine("══════════════════════════════════════════");
             Console.WriteLine($" Total vencidos: {prestamosFiltrados.Count}");
+        }
+
+        public async Task DisponibilidadLibro(string busqueda)
+        {
+            var libro = await _context.Libros
+                .Where(l => l.ISBN == busqueda || l.Titulo.Contains(busqueda))
+                .Select(l => new {
+                    l.ISBN,
+                    l.Titulo,
+                    l.Autor,
+                    l.CantidadCopias,
+                    PrestamosActivos = l.Prestamos
+                        .Count(p => p.EstadoPrestamo.Estado == "Activo"),
+                    ReservasPendientes = l.Reservas
+                        .Count(r => r.EstadoReserva.Descripcion == "Pendiente")
+                })
+                .FirstOrDefaultAsync();
+
+            Console.WriteLine("══════════════════════════════════════════");
+            Console.WriteLine(" DISPONIBILIDAD DEL LIBRO");
+            Console.WriteLine("══════════════════════════════════════════");
+            
+            if (libro == null)
+            {
+                Console.WriteLine(" No se encontraron libros que coincidan con la búsqueda.");
+            }
+            else
+            {
+                Console.WriteLine($" Título:  {libro.Titulo}");
+                Console.WriteLine($" Autor:   {libro.Autor}");
+                Console.WriteLine($" ISBN:    {libro.ISBN}");
+                Console.WriteLine($" Copias totales:      {libro.CantidadCopias}");
+                Console.WriteLine($" Copias disponibles:  {libro.CantidadCopias - libro.PrestamosActivos}");
+                Console.WriteLine($" Reservas pendientes: {libro.ReservasPendientes}");
+            }
+            Console.WriteLine("══════════════════════════════════════════");
+        }
+
+        public async Task HistorialSocio(int nroSocio)
+        {
+            var socio = await _context.Socios
+                .Include(s => s.TipoSocio)
+                .Include(s => s.Prestamos)
+                    .ThenInclude(p => p.Libro)
+                .Include(s => s.Prestamos)
+                    .ThenInclude(p => p.EstadoPrestamo)
+                .Include(s => s.Reservas)
+                    .ThenInclude(r => r.Libro)
+                .Include(s => s.Reservas)
+                    .ThenInclude(r => r.EstadoReserva)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(s => s.NroSocio == nroSocio);
+
+            Console.WriteLine("══════════════════════════════════════════");
+            Console.WriteLine(" HISTORIAL DEL SOCIO");
+            
+            if (socio == null)
+            {
+                Console.WriteLine(" Socio no encontrado.");
+                Console.WriteLine("══════════════════════════════════════════");
+                return;
+            }
+
+            string estadoSocio = socio.Activo ? "Activo" : "Inactivo";
+            Console.WriteLine($" {socio.Nombre} {socio.Apellido} | {socio.TipoSocio.Clase} | {estadoSocio}");
+            Console.WriteLine("══════════════════════════════════════════");
+            
+            Console.WriteLine(" PRÉSTAMOS");
+            if (!socio.Prestamos.Any())
+            {
+                Console.WriteLine("   (Sin préstamos)");
+            }
+            else
+            {
+                foreach (var p in socio.Prestamos)
+                {
+                    Console.WriteLine($"  [#{p.Id}] {p.Libro.Titulo}");
+                    Console.WriteLine($"       Prestado: {p.FechaPrestamo:dd/MM/yyyy} | Vence: {p.FechaVencimiento:dd/MM/yyyy}");
+                    
+                    string estado = p.EstadoPrestamo.Estado;
+                    string icono = estado == "Vencido" ? "⚠" : (estado == "Activo" ? "✓" : "");
+                    string multa = p.MultaGenerada.HasValue ? $" | Multa: ${p.MultaGenerada.Value:F2}" : "";
+                    
+                    Console.WriteLine($"       Estado: {estado} {icono}{multa}");
+                    Console.WriteLine();
+                }
+            }
+
+            Console.WriteLine(" RESERVAS");
+            if (!socio.Reservas.Any())
+            {
+                Console.WriteLine("   (Sin reservas)");
+            }
+            else
+            {
+                foreach (var r in socio.Reservas)
+                {
+                    Console.WriteLine($"  {r.Libro.Titulo} — {r.EstadoReserva.Descripcion} (desde {r.FechaReserva:dd/MM/yyyy})");
+                }
+            }
+            Console.WriteLine("══════════════════════════════════════════");
         }
     }
 }
